@@ -14,7 +14,9 @@ dvfs = sys.argv[4]
 
 qps_str = qps_dir.split('_')[1].split('/')[0]
 
-title_string = " per Epoch (~0.1 seconds) with QPS = " + qps_str + ", ITRD = " + itrd + ", DVFS = " + dvfs 
+time_frame = '0.01'
+
+title_string = " per Epoch (~" + time_frame + " seconds) with QPS = " + qps_str + ", ITRD = " + itrd + ", DVFS = " + dvfs 
 
 epochs_dfs = {}
 for update_dir in os.listdir(exp_dir):
@@ -22,7 +24,7 @@ for update_dir in os.listdir(exp_dir):
         continue
     update = update_dir.split('_')[1]
     subdir = exp_dir + "/" + update_dir + "/" + qps_dir + "/itrd_" + itrd + "_dvfs_" + dvfs + "/"
-    df = pd.read_csv(subdir + "/epochs_per_delta_time.csv", index_col=0)
+    df = pd.read_csv(subdir + "/epochs_per_0.01s.csv", index_col=0)
     epochs_dfs[update] = df
 
 updates = [update for update in epochs_dfs.keys()]
@@ -123,11 +125,11 @@ plt.savefig(exp_dir + "/" + metric.lower() + "_" + qps_str + "_per_update_" + it
 fig = plt.figure(figsize=(13,8))
 legend = []
 metric = "Active_Cores"
-for update in sorted(updates):
+for update in sorted(updates, reverse=True):
     df = epochs_dfs[str(update)]
     cores = df["active_cores"]
     epochs = [i for i in range(0, len(cores))]
-    plt.plot(epochs[50:-50], cores[50:-50])
+    plt.scatter(epochs[50:-50], cores[50:-50], marker='x')
     legend.append("%SETS:" + str(update))
 plt.title(metric + title_string)
 plt.xlabel("Epoch")
